@@ -12,6 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +32,54 @@ public class ConsultaDAO {
         this.conexion = conexion;
     }
     
+    public boolean iniciarConsulta(Consulta consulta) throws PersistenciaExcption, SQLException{
+        
+    Scanner scanner=  new Scanner(System.in);
+        System.out.println("Ingrese la fecha y hora de la consulta( (formato yyyy-MM-dd HH:mm:ss)");
+        String fechaHora= scanner.nextLine();
+        System.out.println("Ingrese el diagnostico del paciente");
+        String diagnostico= scanner.nextLine();
+        System.out.println("Ingrese el tratamiento del paciente");
+        String tratamiento= scanner.nextLine();
+        
+        //recibimos como string fechahpra, pero lo tenemos que convertir a tipo Timestamp 
+        
+        try{
+            Timestamp fechaHoraNuevo= Timestamp.valueOf(fechaHora);
+            
+            
+            consulta.setFecha_hora(fechaHoraNuevo);
+            consulta.setDiagnostico(diagnostico);
+            consulta.setTratamiento(tratamiento);
+        
+        
+        if(registrarConsulta(consulta)){
+         //   return true;
+            logger.info("Cita registrada");
+                  return true;
+        }
+        else{
+          
+            logger.severe("Cita no registrada");
+              return false;
+        }
+        
+} catch(IllegalArgumentException e){
+               System.out.println("El formato de fecha y hora es incorrecto");
+               logger.severe("El formato de fecha y hora es incorrecto");
     
+} catch(PersistenciaExcption p){
+    System.out.println("Error al registrar la consulta.");
+        logger.severe("Error al registrar la consulta: " + p.getMessage());
+        
+}
+
+        return false;
+        
+    }
+
+            
+            
     public boolean registrarConsulta(Consulta consulta) throws PersistenciaExcption {
 
         String consultaSQL = "INSERT INTO consultas (fecha_hora, diagnostico, tratamiento) VALUES (?, ?, ?)";
